@@ -52,6 +52,12 @@
     border-radius:12px; outline:none; transition:.15s; background:#fbfcfe; }
   .field input:focus{ border-color:var(--navy); background:#fff; }
   .hint{ font-size:11.5px; color:var(--mut); margin-top:6px; }
+  .selrow{ display:flex; gap:8px; }
+  .field select{ flex:1; min-width:0; font-size:16px; font-family:inherit; padding:14px 8px; border:2px solid var(--hair);
+    border-radius:12px; outline:none; background-color:#fbfcfe; color:var(--ink); appearance:none; -webkit-appearance:none;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' fill='none' stroke='%238a93a1' stroke-width='1.6' stroke-linecap='round'/></svg>");
+    background-repeat:no-repeat; background-position:right 9px center; padding-right:24px; }
+  .field select:focus{ border-color:var(--navy); background-color:#fff; }
 
   /* 안내 배너 */
   .banner{ display:flex; gap:10px; align-items:flex-start; background:#fff8e6; border:1px solid #f3dfa0;
@@ -139,9 +145,13 @@
       </div>
 
       <div class="field" id="f-student" style="display:none">
-        <label>학번 (숫자 4자리)</label>
-        <input id="in-hakbeon" inputmode="numeric" pattern="[0-9]*" maxlength="5" placeholder="예: 1305 (1학년 3반 5번)">
-        <div class="hint">1305 = 1학년 3반 5번처럼 반·번호를 붙여 입력</div>
+        <label>학년 · 반 · 번호</label>
+        <div class="selrow">
+          <select id="sel-grade"></select>
+          <select id="sel-class"></select>
+          <select id="sel-num"></select>
+        </div>
+        <div class="hint">본인의 학년·반·번호를 선택하세요 (예: 1학년 3반 5번)</div>
       </div>
       <div class="field" id="f-teacher" style="display:none">
         <label>성함</label>
@@ -251,25 +261,39 @@ function toast(m){ var t=$('#toast'); t.textContent=m; t.classList.add('on'); cl
 function show(id){ document.querySelectorAll('.step').forEach(function(s){s.classList.remove('on');}); $('#'+id).classList.add('on'); window.scrollTo(0,0); }
 
 /* ----- STEP1 : 역할/입력 ----- */
+// 학년/반/번호 옵션 채우기
+(function(){
+  function fill(id, from, to, label){
+    var s=$('#'+id), h='<option value="">'+label+'</option>';
+    for(var i=from;i<=to;i++){ h+='<option value="'+i+'">'+i+'</option>'; }
+    s.innerHTML=h;
+  }
+  fill('sel-grade',1,3,'학년'); fill('sel-class',1,6,'반'); fill('sel-num',1,22,'번호');
+})();
 document.querySelectorAll('.role').forEach(function(el){
   el.onclick=function(){
     document.querySelectorAll('.role').forEach(function(r){r.classList.remove('sel');});
     el.classList.add('sel'); role=el.dataset.role;
     $('#f-student').style.display = role==='student'?'block':'none';
     $('#f-teacher').style.display = role==='teacher'?'block':'none';
-    setTimeout(function(){ (role==='student'?$('#in-hakbeon'):$('#in-name')).focus(); },80);
+    if(role==='teacher') setTimeout(function(){ $('#in-name').focus(); },80);
     validate1();
   };
 });
-$('#in-hakbeon').oninput=validate1;
+['sel-grade','sel-class','sel-num'].forEach(function(id){ $('#'+id).onchange=validate1; });
 $('#in-name').oninput=validate1;
-function keyVal(){ return role==='student' ? $('#in-hakbeon').value.trim() : (role==='teacher' ? $('#in-name').value.trim() : ''); }
+function pad2(n){ n=''+n; return n.length<2 ? '0'+n : n; }
+function keyVal(){
+  if(role==='student'){ return $('#sel-grade').value + $('#sel-class').value + pad2($('#sel-num').value); }
+  if(role==='teacher'){ return $('#in-name').value.trim(); }
+  return '';
+}
 function validate1(){
   var ok=false;
-  if(role==='student') ok=/^\d{4,5}$/.test($('#in-hakbeon').value.trim());
-  else if(role==='teacher') ok=$('#in-name').value.trim().length>=1;
+  if(role==='student') ok = !!($('#sel-grade').value && $('#sel-class').value && $('#sel-num').value);
+  else if(role==='teacher') ok = $('#in-name').value.trim().length>=1;
   $('#next1').disabled=!ok;
-  $('#c1').textContent = ok ? '준비 완료' : '정보를 입력하세요';
+  $('#c1').textContent = ok ? '준비 완료' : '정보를 선택하세요';
 }
 $('#next1').onclick=function(){ renderTeams(); show('step2'); $('#bar1').style.display='none'; $('#bar2').style.display='block'; };
 
