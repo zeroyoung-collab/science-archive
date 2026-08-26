@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>SSI 탐구보고서 투표 · 호남고등학교</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Noto+Serif+KR:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#0B3E86; --navy2:#092f66; --gold:#F5B301; --gold-d:#c8920a;
+    --green:#1A9A3E; --ink:#101319; --soft:#454c56; --mut:#8a93a1;
+    --hair:#e6e4df; --lt:#eef3fa; --bg:#f4f6f9; --card:#ffffff;
+    --serif:'Noto Serif KR',serif;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+  body{ font-family:'Noto Sans KR',sans-serif; color:var(--ink); background:var(--bg);
+    line-height:1.6; word-break:keep-all; overflow-wrap:break-word; }
+  .wrap{ max-width:680px; margin:0 auto; padding:0 16px 120px; }
+
+  /* 헤더 */
+  header{ background:var(--navy); color:#fff; padding:22px 16px 20px; }
+  header .in{ max-width:680px; margin:0 auto; }
+  header .kick{ font-size:11px; font-weight:700; letter-spacing:.14em; color:#bcd0ee; }
+  header h1{ font-family:var(--serif); font-weight:900; font-size:23px; margin-top:6px; line-height:1.28; }
+  header .sub{ font-size:12.5px; color:#d7e2f3; margin-top:8px; }
+
+  .step{ display:none; }
+  .step.on{ display:block; animation:rise .35s cubic-bezier(.16,1,.3,1) both; }
+  @keyframes rise{ from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:none;} }
+
+  .panel{ background:var(--card); border:1px solid var(--hair); border-radius:16px;
+    padding:22px 18px; margin-top:20px; box-shadow:0 6px 22px rgba(11,62,134,.06); }
+
+  h2.t{ font-family:var(--serif); font-weight:900; font-size:18px; color:var(--navy); }
+  .lead{ font-size:13.5px; color:var(--soft); margin-top:8px; }
+
+  /* 역할 선택 */
+  .roles{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:18px; }
+  .role{ border:2px solid var(--hair); border-radius:14px; padding:20px 12px; text-align:center;
+    cursor:pointer; transition:.18s; background:#fff; }
+  .role:active{ transform:scale(.97); }
+  .role.sel{ border-color:var(--navy); background:var(--lt); box-shadow:0 0 0 3px rgba(11,62,134,.08); }
+  .role .ic{ font-size:26px; }
+  .role .nm{ font-weight:800; font-size:15px; margin-top:8px; color:var(--navy); }
+  .role .ds{ font-size:11.5px; color:var(--mut); margin-top:3px; }
+
+  .field{ margin-top:18px; }
+  .field label{ display:block; font-size:12.5px; font-weight:700; color:var(--soft); margin-bottom:7px; }
+  .field input{ width:100%; font-size:17px; font-family:inherit; padding:14px 14px; border:2px solid var(--hair);
+    border-radius:12px; outline:none; transition:.15s; background:#fbfcfe; }
+  .field input:focus{ border-color:var(--navy); background:#fff; }
+  .hint{ font-size:11.5px; color:var(--mut); margin-top:6px; }
+
+  /* 안내 배너 */
+  .banner{ display:flex; gap:10px; align-items:flex-start; background:#fff8e6; border:1px solid #f3dfa0;
+    border-radius:12px; padding:12px 14px; margin-top:16px; font-size:12.5px; color:#7a5c05; }
+  .banner b{ color:#8a6600; }
+
+  /* 팀 목록 */
+  .grouphd{ display:flex; align-items:center; gap:8px; margin:22px 4px 10px; }
+  .grouphd .bar{ width:4px; height:16px; background:var(--gold); border-radius:2px; }
+  .grouphd span{ font-weight:800; font-size:13.5px; color:var(--navy); }
+  .grouphd em{ font-style:normal; font-size:11.5px; color:var(--mut); font-weight:600; }
+
+  .team{ position:relative; display:flex; gap:12px; align-items:flex-start; background:var(--card);
+    border:2px solid var(--hair); border-radius:13px; padding:14px 14px; margin-top:9px; cursor:pointer; transition:.15s; }
+  .team:active{ transform:scale(.99); }
+  .team.sel{ border-color:var(--green); background:#f2fbf4; }
+  .team.dim{ opacity:.45; }
+  .box{ flex:0 0 22px; width:22px; height:22px; border:2px solid #c4ccd6; border-radius:7px; margin-top:2px;
+    display:flex; align-items:center; justify-content:center; transition:.15s; }
+  .team.sel .box{ background:var(--green); border-color:var(--green); }
+  .box svg{ width:14px; height:14px; opacity:0; transition:.15s; }
+  .team.sel .box svg{ opacity:1; }
+  .team .body .topic{ font-weight:800; font-size:14.5px; color:var(--ink); }
+  .team .body .q{ font-size:12px; color:var(--soft); margin-top:3px; line-height:1.5; }
+  .team .body .who{ font-size:11.5px; color:var(--navy); margin-top:6px; font-weight:600; }
+
+  /* 하단 고정바 */
+  .bottom{ position:fixed; left:0; right:0; bottom:0; background:rgba(255,255,255,.94);
+    backdrop-filter:blur(8px); border-top:1px solid var(--hair); padding:12px 16px calc(12px + env(safe-area-inset-bottom));
+    z-index:20; }
+  .bottom .in{ max-width:680px; margin:0 auto; display:flex; align-items:center; gap:12px; }
+  .count{ font-size:12.5px; color:var(--soft); font-weight:700; white-space:nowrap; }
+  .count b{ color:var(--green); font-size:16px; }
+  .btn{ flex:1; font-family:inherit; font-weight:800; font-size:15.5px; border:none; border-radius:12px;
+    padding:15px; cursor:pointer; transition:.15s; color:#fff; background:var(--navy); }
+  .btn:active{ transform:scale(.98); }
+  .btn.g{ background:var(--green); }
+  .btn:disabled{ background:#c4ccd6; cursor:not-allowed; }
+  .btn.ghost{ flex:0 0 auto; background:#eef1f5; color:var(--soft); padding:15px 18px; }
+
+  /* 완료/오류 화면 */
+  .center{ text-align:center; padding:40px 16px; }
+  .center .big{ font-size:52px; }
+  .center h2{ font-family:var(--serif); font-weight:900; font-size:22px; color:var(--navy); margin-top:12px; }
+  .center p{ font-size:13.5px; color:var(--soft); margin-top:10px; }
+  .picked{ display:inline-flex; flex-wrap:wrap; gap:6px; justify-content:center; margin-top:16px; }
+  .picked span{ background:var(--lt); color:var(--navy); font-size:12px; font-weight:700; padding:6px 11px; border-radius:20px; }
+
+  .foot{ text-align:center; font-size:11px; color:var(--mut); margin-top:34px; letter-spacing:.02em; }
+  .foot b{ color:var(--soft); }
+
+  .spin{ width:18px; height:18px; border:2.5px solid rgba(255,255,255,.4); border-top-color:#fff;
+    border-radius:50%; display:inline-block; animation:sp .7s linear infinite; vertical-align:-3px; }
+  @keyframes sp{ to{ transform:rotate(360deg); } }
+
+  .toast{ position:fixed; left:50%; bottom:88px; transform:translateX(-50%) translateY(20px); opacity:0;
+    background:#31240a; color:#ffe9b0; font-size:13px; font-weight:600; padding:11px 18px; border-radius:24px;
+    z-index:40; transition:.25s; pointer-events:none; max-width:90%; text-align:center; }
+  .toast.on{ opacity:1; transform:translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<header><div class="in">
+  <div class="kick">호남고등학교 · 과학과 · 과학으로 세상을 묻다</div>
+  <h1>SSI 탐구보고서 인기투표</h1>
+  <div class="sub">가장 인상 깊었던 팀에게 투표해 주세요 · 무기명 · 1인 최대 4팀</div>
+</div></header>
+
+<div class="wrap">
+
+  <!-- STEP 1 : 신원 -->
+  <section class="step on" id="step1">
+    <div class="panel">
+      <h2 class="t">누구신가요?</h2>
+      <p class="lead">1인 1회만 투표할 수 있어요. 아래 정보는 <b>중복 확인용</b>이며, 누가 어느 팀을 뽑았는지는 <b>기록되지 않습니다</b>.</p>
+
+      <div class="roles">
+        <div class="role" data-role="student">
+          <div class="ic">🎓</div><div class="nm">학생</div><div class="ds">학번 입력</div>
+        </div>
+        <div class="role" data-role="teacher">
+          <div class="ic">📋</div><div class="nm">선생님</div><div class="ds">이름 입력</div>
+        </div>
+      </div>
+
+      <div class="field" id="f-student" style="display:none">
+        <label>학번 (숫자 4자리)</label>
+        <input id="in-hakbeon" inputmode="numeric" pattern="[0-9]*" maxlength="5" placeholder="예: 1305 (1학년 3반 5번)">
+        <div class="hint">1305 = 1학년 3반 5번처럼 반·번호를 붙여 입력</div>
+      </div>
+      <div class="field" id="f-teacher" style="display:none">
+        <label>성함</label>
+        <input id="in-name" maxlength="20" placeholder="예: 홍길동">
+        <div class="hint">같은 이름이 있으면 뒤에 과목을 붙여 주세요 (예: 홍길동수학)</div>
+      </div>
+
+      <div class="banner">
+        <span>🔒</span>
+        <div><b>무기명 투표</b>입니다. 입력한 학번·이름은 중복 방지에만 쓰이고, 투표 결과 집계에는 남지 않아요.</div>
+      </div>
+    </div>
+
+    <div class="foot">제작 · 호남고 조영신</div>
+  </section>
+
+  <!-- STEP 2 : 투표 -->
+  <section class="step" id="step2">
+    <div class="panel" style="padding-bottom:14px">
+      <h2 class="t">가장 좋았던 팀을 골라주세요</h2>
+      <p class="lead">최대 <b>4팀</b>까지 선택할 수 있어요. 팀은 <b>탐구 주제와 팀원 이름</b>으로 구분됩니다.</p>
+    </div>
+    <div id="teamlist"></div>
+    <div class="foot">제작 · 호남고 조영신</div>
+  </section>
+
+  <!-- STEP 3 : 완료 -->
+  <section class="step" id="step3">
+    <div class="center">
+      <div class="big">✅</div>
+      <h2>투표가 완료되었습니다</h2>
+      <p>소중한 한 표 감사합니다.<br>선택하신 팀은 다음과 같아요.</p>
+      <div class="picked" id="pickedList"></div>
+      <p style="margin-top:22px; color:var(--mut); font-size:12px;">결과는 집계 후 별도로 공개됩니다.</p>
+    </div>
+    <div class="foot">제작 · 호남고 조영신</div>
+  </section>
+
+  <!-- 오류/중복/마감 -->
+  <section class="step" id="stepErr">
+    <div class="center">
+      <div class="big" id="errIc">⚠️</div>
+      <h2 id="errTitle">안내</h2>
+      <p id="errMsg"></p>
+      <div style="margin-top:24px"><button class="btn" style="max-width:220px;margin:0 auto;display:block" onclick="location.reload()">처음으로</button></div>
+    </div>
+  </section>
+
+</div>
+
+<!-- 하단바 : STEP1/2에서만 -->
+<div class="bottom" id="bar1">
+  <div class="in">
+    <div class="count" id="c1">시작하기</div>
+    <button class="btn" id="next1" disabled>다음 →</button>
+  </div>
+</div>
+<div class="bottom" id="bar2" style="display:none">
+  <div class="in">
+    <button class="btn ghost" id="back2">←</button>
+    <div class="count">선택 <b id="cnt">0</b>/4</div>
+    <button class="btn g" id="submit" disabled>투표 완료</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ========= 설정 ========= */
+// ▼ Apps Script 웹앱 배포 후 나오는 /exec URL 을 여기에 붙여넣으세요
+var ENDPOINT = "https://script.google.com/macros/s/AKfycbzWAxJA0DlEP5OHzP6QTCm5hwYk99U8et6iuNmZNTfkPQrlGNsBrabgt3yM3hFT16Hl/exec";
+var MAX = 4;
+
+/* ========= 팀 데이터 (22팀) ========= */
+var TEAMS = [
+  {id:'t01', subj:'물리',     topic:'빛의 속도',        q:'초속 30만 km로 달리는 파동, 그 정체는?', who:'김준성·임영훈·노온유'},
+  {id:'t02', subj:'물리',     topic:'빛의 속도',        q:'초속 30만 km로 달리는 파동, 그 정체는?', who:'정서율·오승현·김도현·김동준'},
+  {id:'t03', subj:'물리',     topic:'자율주행차 책임',   q:'자율주행차 사고, 그 책임은 누구에게?', who:'김진원·박주현'},
+  {id:'t04', subj:'물리',     topic:'자율주행차 책임',   q:'자율주행차 사고, 그 책임은 누구에게?', who:'기민성·강지율'},
+  {id:'t05', subj:'물리',     topic:'논밭 위 태양광',    q:'식량 위기인가 농촌의 햇빛 연금인가?', who:'천광범·김주용'},
+  {id:'t06', subj:'생명과학', topic:'효소 변성',        q:'열과 산은 어떻게 효소를 무너뜨리는가?', who:'백서우·김해인'},
+  {id:'t07', subj:'생명과학', topic:'항생제 내성균',     q:'내성균은 어떻게 태어나 퍼지는가?', who:'임서하·이지민·김성현'},
+  {id:'t08', subj:'생명과학', topic:'항생제 내성균',     q:'내성균은 어떻게 태어나 퍼지는가?', who:'김지호·이하윤·최수호·신인성'},
+  {id:'t09', subj:'생명과학', topic:'항생제 내성균',     q:'내성균은 어떻게 태어나 퍼지는가?', who:'이지환·김동건'},
+  {id:'t10', subj:'생명과학', topic:'모기 멸종',        q:'인간을 위해 모기를 멸종시켜도 되는가?', who:'이가은·이혜민·김희주·정아윤'},
+  {id:'t20', subj:'생명과학', topic:'모기 멸종',        q:'인간을 위해 모기를 멸종시켜도 되는가?', who:'이재영'},
+  {id:'t13', subj:'화학',     topic:'탄소 동소체',      q:'다이아몬드는 안 통하는데 흑연은 통한다?', who:'김태현·박광민·이현성·정은찬'},
+  {id:'t14', subj:'화학',     topic:'썩는 플라스틱',     q:'자연을 모방해 썩는 플라스틱을?', who:'박시현·양하윤·이세빈·소하윤'},
+  {id:'t15', subj:'화학',     topic:'썩는 플라스틱',     q:'자연을 모방해 썩는 플라스틱을?', who:'정승아·김해진'},
+  {id:'t16', subj:'화학',     topic:'썩는 플라스틱',     q:'자연을 모방해 썩는 플라스틱을?', who:'김민성'},
+  {id:'t17', subj:'화학',     topic:'희토류 채굴 윤리',  q:'아동 노동·생태 파괴를 눈감아도 되는가?', who:'정서윤·천수민'},
+  {id:'t18', subj:'화학',     topic:'희토류 채굴 윤리',  q:'아동 노동·생태 파괴를 눈감아도 되는가?', who:'설혜인·정윤서'},
+  {id:'t19', subj:'화학',     topic:'희토류 채굴 윤리',  q:'아동 노동·생태 파괴를 눈감아도 되는가?', who:'윤여은·김아현'},
+  {id:'t21', subj:'화학',     topic:'희토류 채굴 윤리',  q:'아동 노동·생태 파괴를 눈감아도 되는가?', who:'이덕기·정우성·홍채원'},
+  {id:'t12', subj:'지구과학', topic:'온실가스 감축',     q:'그 책임과 비용은 누가 지는가?', who:'방서희·김민유'},
+  {id:'t11', subj:'정읍지역', topic:'논밭 태양광 · 정읍', q:'정읍 농촌을 살릴까 무너뜨릴까?', who:'최연아·김아현·김하은·서은선'},
+  {id:'t22', subj:'정읍지역', topic:'논밭 태양광 · 정읍', q:'정읍 농촌을 살릴까 무너뜨릴까?', who:'문준'}
+];
+var SUBJ_ORDER = ['물리','생명과학','화학','지구과학','정읍지역'];
+
+/* ========= 상태 ========= */
+var role=null, picked=[];
+var $ = function(s){ return document.querySelector(s); };
+var CHK = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 6"/></svg>';
+
+function toast(m){ var t=$('#toast'); t.textContent=m; t.classList.add('on'); clearTimeout(t._t); t._t=setTimeout(function(){t.classList.remove('on');},2200); }
+function show(id){ document.querySelectorAll('.step').forEach(function(s){s.classList.remove('on');}); $('#'+id).classList.add('on'); window.scrollTo(0,0); }
+
+/* ----- STEP1 : 역할/입력 ----- */
+document.querySelectorAll('.role').forEach(function(el){
+  el.onclick=function(){
+    document.querySelectorAll('.role').forEach(function(r){r.classList.remove('sel');});
+    el.classList.add('sel'); role=el.dataset.role;
+    $('#f-student').style.display = role==='student'?'block':'none';
+    $('#f-teacher').style.display = role==='teacher'?'block':'none';
+    setTimeout(function(){ (role==='student'?$('#in-hakbeon'):$('#in-name')).focus(); },80);
+    validate1();
+  };
+});
+$('#in-hakbeon').oninput=validate1;
+$('#in-name').oninput=validate1;
+function keyVal(){ return role==='student' ? $('#in-hakbeon').value.trim() : (role==='teacher' ? $('#in-name').value.trim() : ''); }
+function validate1(){
+  var ok=false;
+  if(role==='student') ok=/^\d{4,5}$/.test($('#in-hakbeon').value.trim());
+  else if(role==='teacher') ok=$('#in-name').value.trim().length>=1;
+  $('#next1').disabled=!ok;
+  $('#c1').textContent = ok ? '준비 완료' : '정보를 입력하세요';
+}
+$('#next1').onclick=function(){ renderTeams(); show('step2'); $('#bar1').style.display='none'; $('#bar2').style.display='block'; };
+
+/* ----- STEP2 : 팀 목록 ----- */
+function renderTeams(){
+  var host=$('#teamlist'); host.innerHTML='';
+  SUBJ_ORDER.forEach(function(sj){
+    var items=TEAMS.filter(function(t){return t.subj===sj;});
+    if(!items.length) return;
+    var hd=document.createElement('div'); hd.className='grouphd';
+    hd.innerHTML='<div class="bar"></div><span>'+sj+'</span><em>'+items.length+'팀</em>';
+    host.appendChild(hd);
+    items.forEach(function(t){
+      var d=document.createElement('div'); d.className='team'; d.dataset.id=t.id;
+      d.innerHTML='<div class="box">'+CHK+'</div><div class="body">'+
+        '<div class="topic">'+t.topic+'</div>'+
+        '<div class="q">'+t.q+'</div>'+
+        '<div class="who">'+t.who+'</div></div>';
+      d.onclick=function(){ toggle(t.id, d); };
+      host.appendChild(d);
+    });
+  });
+}
+function toggle(id, el){
+  var i=picked.indexOf(id);
+  if(i>=0){ picked.splice(i,1); el.classList.remove('sel'); }
+  else{
+    if(picked.length>=MAX){ toast('최대 '+MAX+'팀까지 선택할 수 있어요'); return; }
+    picked.push(id); el.classList.add('sel');
+  }
+  $('#cnt').textContent=picked.length;
+  $('#submit').disabled = picked.length<1;
+  // 4개 차면 나머지 흐리게
+  var full=picked.length>=MAX;
+  document.querySelectorAll('.team').forEach(function(t){
+    t.classList.toggle('dim', full && picked.indexOf(t.dataset.id)<0);
+  });
+}
+$('#back2').onclick=function(){ show('step1'); $('#bar2').style.display='none'; $('#bar1').style.display='block'; };
+
+/* ----- 제출 ----- */
+$('#submit').onclick=function(){
+  if(picked.length<1) return;
+  if(ENDPOINT.indexOf('PASTE_')===0){ toast('서버 주소가 아직 설정되지 않았어요'); return; }
+  var btn=$('#submit'); btn.disabled=true; var old=btn.innerHTML; btn.innerHTML='<span class="spin"></span> 제출 중…';
+  var payload={ role:role, key:keyVal(), teams:picked };
+  fetch(ENDPOINT, { method:'POST', body:JSON.stringify(payload) })
+    .then(function(r){ return r.json(); })
+    .then(function(res){
+      if(res.status==='ok'){ showDone(); }
+      else if(res.status==='dup'){ err('🙅','이미 투표하셨어요','한 분당 한 번만 투표할 수 있습니다.'); }
+      else if(res.status==='closed'){ err('⏰','투표가 마감되었어요','투표 기간이 종료되었습니다. 참여해 주셔서 감사합니다.'); }
+      else if(res.status==='busy'){ btn.disabled=false; btn.innerHTML=old; toast('접속이 몰리고 있어요. 잠시 후 다시 눌러주세요'); }
+      else { btn.disabled=false; btn.innerHTML=old; toast(res.msg||'오류가 발생했어요. 다시 시도해주세요'); }
+    })
+    .catch(function(){ btn.disabled=false; btn.innerHTML=old; toast('네트워크 오류. 연결을 확인하고 다시 시도해주세요'); });
+};
+function showDone(){
+  var host=$('#pickedList'); host.innerHTML='';
+  picked.forEach(function(id){ var t=TEAMS.filter(function(x){return x.id===id;})[0];
+    var s=document.createElement('span'); s.textContent=t.topic+' · '+t.who; host.appendChild(s); });
+  $('#bar2').style.display='none'; show('step3');
+}
+function err(ic,ti,ms){ $('#errIc').textContent=ic; $('#errTitle').textContent=ti; $('#errMsg').textContent=ms;
+  $('#bar1').style.display='none'; $('#bar2').style.display='none'; show('stepErr'); }
+
+/* 투표 열림 여부 확인 (마감 시 진입 차단) */
+if(ENDPOINT.indexOf('PASTE_')!==0){
+  fetch(ENDPOINT).then(function(r){return r.json();}).then(function(res){
+    if(res && res.open===false){ err('⏰','투표가 마감되었어요','투표 기간이 종료되었습니다. 참여해 주셔서 감사합니다.'); }
+  }).catch(function(){});
+}
+</script>
+</body>
+</html>

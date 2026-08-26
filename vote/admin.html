@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SSI 투표 현황판 · 호남고등학교</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Noto+Serif+KR:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root{ --navy:#0B3E86; --gold:#F5B301; --gold-d:#c8920a; --green:#1A9A3E; --ink:#101319;
+    --soft:#454c56; --mut:#8a93a1; --hair:#e6e4df; --lt:#eef3fa; --bg:#f4f6f9; --serif:'Noto Serif KR',serif; }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  body{ font-family:'Noto Sans KR',sans-serif; color:var(--ink); background:var(--bg); line-height:1.55; word-break:keep-all; }
+  .wrap{ max-width:820px; margin:0 auto; padding:0 16px 80px; }
+  header{ background:var(--navy); color:#fff; padding:20px 16px; }
+  header .in{ max-width:820px; margin:0 auto; }
+  header .kick{ font-size:11px; font-weight:700; letter-spacing:.14em; color:#bcd0ee; }
+  header h1{ font-family:var(--serif); font-weight:900; font-size:20px; margin-top:5px; }
+
+  .gate{ max-width:380px; margin:60px auto; background:#fff; border:1px solid var(--hair); border-radius:16px; padding:28px 22px; box-shadow:0 8px 26px rgba(11,62,134,.08); }
+  .gate h2{ font-family:var(--serif); font-size:18px; color:var(--navy); }
+  .gate p{ font-size:12.5px; color:var(--mut); margin-top:6px; }
+  .gate input{ width:100%; font-size:16px; padding:13px; border:2px solid var(--hair); border-radius:11px; margin-top:16px; outline:none; }
+  .gate input:focus{ border-color:var(--navy); }
+  .gate button{ width:100%; margin-top:12px; padding:14px; border:none; border-radius:11px; background:var(--navy); color:#fff; font-weight:800; font-size:15px; font-family:inherit; cursor:pointer; }
+
+  .board{ display:none; }
+  .stats{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:20px; }
+  .stat{ background:#fff; border:1px solid var(--hair); border-radius:14px; padding:16px 14px; text-align:center; }
+  .stat .n{ font-family:var(--serif); font-weight:900; font-size:30px; color:var(--navy); line-height:1; }
+  .stat .l{ font-size:11.5px; color:var(--mut); margin-top:7px; font-weight:600; }
+
+  .toolbar{ display:flex; align-items:center; gap:10px; margin-top:18px; flex-wrap:wrap; }
+  .status{ font-size:12.5px; font-weight:800; padding:7px 13px; border-radius:20px; }
+  .status.open{ background:#e6f7ec; color:#137a30; }
+  .status.closed{ background:#fdeaea; color:#b02525; }
+  .tbtn{ font-family:inherit; font-size:12.5px; font-weight:700; padding:8px 14px; border-radius:10px; border:1px solid var(--hair); background:#fff; cursor:pointer; color:var(--soft); }
+  .tbtn.danger{ color:#b02525; border-color:#f0c9c9; }
+  .tbtn.go{ color:#137a30; border-color:#bfe6cc; }
+  .auto{ font-size:11.5px; color:var(--mut); margin-left:auto; }
+
+  h3.sec{ font-family:var(--serif); font-size:16px; color:var(--navy); margin:26px 4px 4px; }
+  .subnote{ font-size:11.5px; color:var(--mut); margin:0 4px 8px; }
+
+  .rows{ background:#fff; border:1px solid var(--hair); border-radius:14px; padding:8px 6px; }
+  .row{ display:flex; align-items:center; gap:10px; padding:9px 8px; border-bottom:1px solid #f1f0ec; }
+  .row:last-child{ border-bottom:none; }
+  .rank{ flex:0 0 26px; text-align:center; font-weight:900; font-size:14px; color:var(--mut); }
+  .row.top1 .rank{ color:var(--gold-d); } .row.top2 .rank,.row.top3 .rank{ color:var(--navy); }
+  .info{ flex:1; min-width:0; }
+  .info .tp{ font-weight:700; font-size:13.5px; }
+  .info .wh{ font-size:11px; color:var(--mut); margin-top:1px; }
+  .barwrap{ flex:1.1; height:22px; background:#f0f3f7; border-radius:6px; overflow:hidden; position:relative; }
+  .bar{ height:100%; background:linear-gradient(90deg,var(--navy),#1f6fd6); border-radius:6px; width:0; transition:width .5s cubic-bezier(.16,1,.3,1); }
+  .row.top1 .bar{ background:linear-gradient(90deg,var(--gold-d),var(--gold)); }
+  .vcount{ flex:0 0 54px; text-align:right; font-weight:800; font-size:14px; color:var(--ink); }
+  .subtag{ display:inline-block; font-size:10px; font-weight:700; color:#fff; background:var(--mut); border-radius:5px; padding:1px 6px; margin-right:5px; vertical-align:1px; }
+  .foot{ text-align:center; font-size:11px; color:var(--mut); margin-top:30px; }
+  .err{ color:#b02525; font-size:13px; text-align:center; margin-top:14px; }
+</style>
+</head>
+<body>
+<header><div class="in">
+  <div class="kick">호남고등학교 · 과학과 · 관리자</div>
+  <h1>SSI 탐구보고서 투표 현황판</h1>
+</div></header>
+
+<div class="wrap">
+  <!-- 로그인 -->
+  <div class="gate" id="gate">
+    <h2>현황판 접속</h2>
+    <p>담당 선생님 전용입니다. 비밀번호를 입력하세요.</p>
+    <input id="pw" type="password" placeholder="비밀번호" autocomplete="off">
+    <button id="enter">현황 보기</button>
+    <div class="err" id="gerr" style="display:none">비밀번호가 올바르지 않거나 서버에 연결할 수 없습니다.</div>
+  </div>
+
+  <!-- 대시보드 -->
+  <div class="board" id="board">
+    <div class="stats">
+      <div class="stat"><div class="n" id="s-total">0</div><div class="l">총 참여 인원</div></div>
+      <div class="stat"><div class="n" id="s-stu">0</div><div class="l">학생</div></div>
+      <div class="stat"><div class="n" id="s-tea">0</div><div class="l">선생님</div></div>
+    </div>
+
+    <div class="toolbar">
+      <span class="status" id="statusPill">—</span>
+      <button class="tbtn danger" id="btnClose">투표 마감</button>
+      <button class="tbtn go" id="btnOpen" style="display:none">투표 재개</button>
+      <span class="auto" id="auto">자동 새로고침 10초</span>
+    </div>
+
+    <h3 class="sec">팀별 득표 순위</h3>
+    <div class="subnote">1인 최대 4팀 복수선택이라 득표 합계는 참여 인원보다 많을 수 있습니다.</div>
+    <div class="rows" id="rows"></div>
+
+    <div class="foot">제작 · 호남고 조영신</div>
+  </div>
+</div>
+
+<script>
+var ENDPOINT = "https://script.google.com/macros/s/AKfycbzWAxJA0DlEP5OHzP6QTCm5hwYk99U8et6iuNmZNTfkPQrlGNsBrabgt3yM3hFT16Hl/exec";  // ▲ 투표 페이지와 동일한 /exec URL
+
+var TEAMS = [
+  {id:'t01', subj:'물리', topic:'빛의 속도', who:'김준성·임영훈·노온유'},
+  {id:'t02', subj:'물리', topic:'빛의 속도', who:'정서율·오승현·김도현·김동준'},
+  {id:'t03', subj:'물리', topic:'자율주행차 책임', who:'김진원·박주현'},
+  {id:'t04', subj:'물리', topic:'자율주행차 책임', who:'기민성·강지율'},
+  {id:'t05', subj:'물리', topic:'논밭 위 태양광', who:'천광범·김주용'},
+  {id:'t06', subj:'생명', topic:'효소 변성', who:'백서우·김해인'},
+  {id:'t07', subj:'생명', topic:'항생제 내성균', who:'임서하·이지민·김성현'},
+  {id:'t08', subj:'생명', topic:'항생제 내성균', who:'김지호·이하윤·최수호·신인성'},
+  {id:'t09', subj:'생명', topic:'항생제 내성균', who:'이지환·김동건'},
+  {id:'t10', subj:'생명', topic:'모기 멸종', who:'이가은·이혜민·김희주·정아윤'},
+  {id:'t20', subj:'생명', topic:'모기 멸종', who:'이재영'},
+  {id:'t13', subj:'화학', topic:'탄소 동소체', who:'김태현·박광민·이현성·정은찬'},
+  {id:'t14', subj:'화학', topic:'썩는 플라스틱', who:'박시현·양하윤·이세빈·소하윤'},
+  {id:'t15', subj:'화학', topic:'썩는 플라스틱', who:'정승아·김해진'},
+  {id:'t16', subj:'화학', topic:'썩는 플라스틱', who:'김민성'},
+  {id:'t17', subj:'화학', topic:'희토류 채굴', who:'정서윤·천수민'},
+  {id:'t18', subj:'화학', topic:'희토류 채굴', who:'설혜인·정윤서'},
+  {id:'t19', subj:'화학', topic:'희토류 채굴', who:'윤여은·김아현'},
+  {id:'t21', subj:'화학', topic:'희토류 채굴', who:'이덕기·정우성·홍채원'},
+  {id:'t12', subj:'지구', topic:'온실가스 감축', who:'방서희·김민유'},
+  {id:'t11', subj:'정읍', topic:'논밭 태양광·정읍', who:'최연아·김아현·김하은·서은선'},
+  {id:'t22', subj:'정읍', topic:'논밭 태양광·정읍', who:'문준'}
+];
+var MAP={}; TEAMS.forEach(function(t){ MAP[t.id]=t; });
+var $=function(s){return document.querySelector(s);};
+var pw='', timer=null;
+
+$('#enter').onclick=login;
+$('#pw').addEventListener('keydown',function(e){ if(e.key==='Enter') login(); });
+function login(){
+  pw=$('#pw').value.trim(); if(!pw) return;
+  load(true);
+}
+function url(extra){ return ENDPOINT+'?admin='+encodeURIComponent(pw)+(extra||'')+'&t='+Date.now(); }
+
+function load(first){
+  if(ENDPOINT.indexOf('PASTE_')===0){ $('#gerr').style.display='block'; $('#gerr').textContent='서버 주소(ENDPOINT)가 아직 설정되지 않았습니다.'; return; }
+  fetch(url('')).then(function(r){return r.json();}).then(function(res){
+    if(!res || res.status!=='ok' || res.counts===undefined){ $('#gerr').style.display='block'; return; }
+    if(first){ $('#gate').style.display='none'; $('#board').style.display='block';
+      timer=setInterval(function(){ load(false); }, 10000); }
+    render(res);
+  }).catch(function(){ $('#gerr').style.display='block'; });
+}
+
+function render(res){
+  $('#s-total').textContent=res.total||0;
+  $('#s-stu').textContent=res.students||0;
+  $('#s-tea').textContent=res.teachers||0;
+  var pill=$('#statusPill');
+  if(res.open){ pill.textContent='● 투표 진행 중'; pill.className='status open'; $('#btnClose').style.display=''; $('#btnOpen').style.display='none'; }
+  else{ pill.textContent='■ 투표 마감됨'; pill.className='status closed'; $('#btnClose').style.display='none'; $('#btnOpen').style.display=''; }
+
+  var arr=TEAMS.map(function(t){ return {t:t, n:(res.counts[t.id]||0)}; });
+  arr.sort(function(a,b){ return b.n-a.n; });
+  var max=Math.max(1, arr[0].n);
+  var host=$('#rows'); host.innerHTML='';
+  arr.forEach(function(o,i){
+    var d=document.createElement('div'); d.className='row'+(i<3?(' top'+(i+1)):'');
+    d.innerHTML=
+      '<div class="rank">'+(i+1)+'</div>'+
+      '<div class="info"><div class="tp"><span class="subtag">'+o.t.subj+'</span>'+o.t.topic+'</div>'+
+        '<div class="wh">'+o.t.who+'</div></div>'+
+      '<div class="barwrap"><div class="bar" style="width:'+Math.round(o.n/max*100)+'%"></div></div>'+
+      '<div class="vcount">'+o.n+'표</div>';
+    host.appendChild(d);
+  });
+}
+
+$('#btnClose').onclick=function(){ if(confirm('투표를 마감할까요? 이후 새 투표가 차단됩니다.')) act('close'); };
+$('#btnOpen').onclick=function(){ if(confirm('투표를 다시 열까요?')) act('open'); };
+function act(a){ fetch(url('&action='+a)).then(function(r){return r.json();}).then(render).catch(function(){}); }
+</script>
+</body>
+</html>
