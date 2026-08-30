@@ -339,7 +339,7 @@ function renderTeams(){
         '<div class="topic">'+t.topic+'</div>'+
         '<div class="q">'+t.q+'</div>'+
         '<div class="who">'+t.who+'</div>'+
-        '<img class="pimg" loading="lazy" src="posters/'+t.id+'.jpg" alt="'+t.topic+' 인포그래픽">'+
+        '<img class="pimg" loading="lazy" src="posters/'+t.id+'.jpg?v=2" alt="'+t.topic+' 인포그래픽">'+
         '<div class="phint">인포그래픽을 누르면 크게 볼 수 있어요</div></div>';
       d.onclick=function(){ toggle(t.id, d); };
       d.querySelector('.pimg').onclick=function(e){ e.stopPropagation(); openPoster(t); };
@@ -372,7 +372,7 @@ function openPoster(t){
   var img=new Image();
   img.onload=function(){ body.innerHTML=''; body.appendChild(img); };
   img.onerror=function(){ body.innerHTML='<div class="pload">포스터를 불러오지 못했어요.<br>네트워크 상태를 확인해 주세요.</div>'; };
-  img.src='posters/'+t.id+'.jpg';
+  img.src='posters/'+t.id+'.jpg?v=2';
   img.alt=t.topic+' 포스터';
   $('#pmodal').classList.add('on');
   document.body.style.overflow='hidden';
