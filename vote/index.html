@@ -83,10 +83,9 @@
   .team .body .topic{ font-weight:800; font-size:14.5px; color:var(--ink); }
   .team .body .q{ font-size:12px; color:var(--soft); margin-top:3px; line-height:1.5; }
   .team .body .who{ font-size:11.5px; color:var(--navy); margin-top:6px; font-weight:600; }
-  .pbtn{ display:inline-flex; align-items:center; gap:5px; margin-top:8px; font-family:inherit;
-    font-size:11.5px; font-weight:700; color:var(--navy); background:var(--lt);
-    border:1px solid #d4e0f0; border-radius:8px; padding:5px 10px; cursor:pointer; transition:.15s; }
-  .pbtn:active{ transform:scale(.96); }
+  .pimg{ display:block; width:100%; margin-top:10px; border:1px solid var(--hair);
+    border-radius:10px; background:#fff; cursor:zoom-in; }
+  .phint{ font-size:10.5px; color:var(--mut); margin-top:5px; text-align:right; }
 
   /* 포스터 모달 */
   .pmodal{ display:none; position:fixed; inset:0; z-index:60; background:rgba(8,20,44,.82);
@@ -340,9 +339,10 @@ function renderTeams(){
         '<div class="topic">'+t.topic+'</div>'+
         '<div class="q">'+t.q+'</div>'+
         '<div class="who">'+t.who+'</div>'+
-        '<button class="pbtn" type="button">🖼 포스터 보기</button></div>';
+        '<img class="pimg" loading="lazy" src="posters/'+t.id+'.jpg" alt="'+t.topic+' 인포그래픽">'+
+        '<div class="phint">인포그래픽을 누르면 크게 볼 수 있어요</div></div>';
       d.onclick=function(){ toggle(t.id, d); };
-      d.querySelector('.pbtn').onclick=function(e){ e.stopPropagation(); openPoster(t); };
+      d.querySelector('.pimg').onclick=function(e){ e.stopPropagation(); openPoster(t); };
       host.appendChild(d);
     });
   });
